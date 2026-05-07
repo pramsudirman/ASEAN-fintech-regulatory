@@ -1,7 +1,7 @@
 import { task } from '@trigger.dev/sdk/v3'
 import { nim, NIM_MODELS } from '../../lib/nim'
 import { firecrawl } from '../../lib/firecrawl'
-import { supabaseAdmin } from '../../lib/supabase'
+import { supabaseAdmin } from '../../lib/supabase-admin'
 import type { CountryConfig } from '../country-configs/types'
 
 const EXTRACTION_SYSTEM_PROMPT = `

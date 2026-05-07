@@ -1,5 +1,5 @@
 import { nim, NIM_MODELS } from '@/lib/nim'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {

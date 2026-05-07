@@ -8,7 +8,7 @@ import { DossierTable } from '@/components/DossierTable'
 import { ExportButton } from '@/components/ExportButton'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-browser'
 import type { RegulatoryRequirement } from '@/lib/supabase'
 
 interface DossierResponse {

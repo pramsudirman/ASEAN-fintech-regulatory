@@ -1,19 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
-
-// Browser/server client — uses anon key, subject to RLS
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
-// Server-only admin client — uses service role key, bypasses RLS
-// Only import in API routes / Trigger.dev tasks, never in client components
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
-
-// ── Types ──────────────────────────────────────────────────────────────────
+// ── Types only — no client instantiation here ─────────────────────────────
+// Browser client:  import from '@/lib/supabase-browser'
+// Server/admin:    import from '@/lib/supabase-admin'
 
 export type RiskLevel = 'HIGH' | 'MODERATE' | 'LOW' | 'UNKNOWN'
 export type ChangeType = 'ADDED' | 'UPDATED' | 'RISK_CHANGED' | 'REMOVED'

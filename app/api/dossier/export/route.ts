@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import type { RegulatoryRequirement } from '@/lib/supabase'
 
 const RISK_ORDER: Record<string, number> = { HIGH: 0, MODERATE: 1, LOW: 2, UNKNOWN: 3 }
