@@ -13,10 +13,12 @@ export async function GET(req: NextRequest) {
   // Embed query using same model as stored vectors
   let queryEmbedding: number[]
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const embRes = await nim.embeddings.create({
       model: NIM_MODELS.embedding,
       input: q,
-    })
+      input_type: 'query',
+    } as any)
     queryEmbedding = embRes.data[0].embedding
   } catch (err) {
     return NextResponse.json(

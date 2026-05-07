@@ -145,10 +145,12 @@ export const countryScanTask = task({
           // Step 4: Generate embedding via nvidia/nv-embedqa-e5-v5
           let embedding: number[] | null = null
           try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const embRes = await nim.embeddings.create({
               model: NIM_MODELS.embedding,
               input: `${req.title}. ${req.summary}`,
-            })
+              input_type: 'passage',
+            } as any)
             embedding = embRes.data[0].embedding
           } catch (err) {
             console.warn('Embedding failed:', err)
