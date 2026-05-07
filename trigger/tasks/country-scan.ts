@@ -142,7 +142,7 @@ export const countryScanTask = task({
             console.warn('Risk classification failed:', err)
           }
 
-          // Step 4: Generate embedding via nvidia/nv-embed-v2
+          // Step 4: Generate embedding via nvidia/nv-embedqa-e5-v5
           let embedding: number[] | null = null
           try {
             const embRes = await nim.embeddings.create({

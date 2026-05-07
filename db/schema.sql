@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS regulatory_requirements (
   last_changed_at       TIMESTAMPTZ,
   is_stale              BOOLEAN      DEFAULT FALSE,
 
-  -- nvidia/nv-embed-v2 produces 4096-dim embeddings
-  embedding             vector(4096),
+  -- nvidia/nv-embed-v2 produces 1024-dim embeddings
+  embedding             vector(1024),
 
   created_at            TIMESTAMPTZ  DEFAULT NOW(),
   updated_at            TIMESTAMPTZ  DEFAULT NOW(),
@@ -74,10 +74,10 @@ CREATE INDEX IF NOT EXISTS idx_req_risk_level
 CREATE INDEX IF NOT EXISTS idx_req_is_stale
   ON regulatory_requirements (is_stale) WHERE is_stale = TRUE;
 
--- Semantic search index (IVFFlat — build after seeding data)
+-- Semantic search index (HNSW — required for >2000 dims; nv-embed-v2 = 1024)
 CREATE INDEX IF NOT EXISTS idx_req_embedding
-  ON regulatory_requirements USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
+  ON regulatory_requirements USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
 
 -- ── Changelog ──────────────────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ $$;
 -- ── Semantic Search RPC ────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION search_requirements(
-  query_embedding vector(4096),
+  query_embedding vector(1024),
   match_count     INT DEFAULT 10
 )
 RETURNS TABLE (
