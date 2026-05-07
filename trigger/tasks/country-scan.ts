@@ -4,6 +4,26 @@ import { firecrawl } from '../../lib/firecrawl'
 import { supabaseAdmin } from '../../lib/supabase-admin'
 import type { CountryConfig } from '../country-configs/types'
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+async function nimWithBackoff<T>(fn: () => Promise<T>, maxRetries = 4): Promise<T> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (err: unknown) {
+      const status = (err as { status?: number }).status
+      if (status === 429 && attempt < maxRetries) {
+        const delay = Math.min(2000 * 2 ** attempt, 30000)
+        console.warn(`NIM 429 — retry ${attempt + 1}/${maxRetries} in ${delay}ms`)
+        await sleep(delay)
+        continue
+      }
+      throw err
+    }
+  }
+  throw new Error('unreachable')
+}
+
 const EXTRACTION_SYSTEM_PROMPT = `
 You are a regulatory analyst. Given scraped content from a financial regulator's website,
 extract regulatory requirements relevant to fintech operations.
@@ -57,7 +77,10 @@ export const countryScanTask = task({
     let pagesScraped = 0
 
     try {
-      for (const source of config.sources) {
+      for (let si = 0; si < config.sources.length; si++) {
+        const source = config.sources[si]
+        if (si > 0) await sleep(1500) // throttle between sources
+
         // Step 1: Scrape via Firecrawl — returns clean markdown
         let content = ''
         try {
@@ -86,18 +109,20 @@ export const countryScanTask = task({
         }> = []
 
         try {
-          const extractionResponse = await nim.chat.completions.create({
-            model: NIM_MODELS.extraction,
-            messages: [
-              { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
-              {
-                role: 'user',
-                content: `Product vertical: ${source.productVertical}\n\nContent:\n${content}`,
-              },
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.1,
-          })
+          const extractionResponse = await nimWithBackoff(() =>
+            nim.chat.completions.create({
+              model: NIM_MODELS.extraction,
+              messages: [
+                { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
+                {
+                  role: 'user',
+                  content: `Product vertical: ${source.productVertical}\n\nContent:\n${content}`,
+                },
+              ],
+              response_format: { type: 'json_object' },
+              temperature: 0.1,
+            })
+          )
 
           const parsed = JSON.parse(
             extractionResponse.choices[0].message.content ?? '{}'
@@ -118,22 +143,24 @@ export const countryScanTask = task({
           let riskReason: string | null = null
 
           try {
-            const classRes = await nim.chat.completions.create({
-              model: NIM_MODELS.classification,
-              messages: [
-                {
-                  role: 'user',
-                  content: buildRiskPrompt(
-                    req.summary,
-                    req.risk_signals ?? [],
-                    config.name,
-                    source.productVertical
-                  ),
-                },
-              ],
-              response_format: { type: 'json_object' },
-              temperature: 0,
-            })
+            const classRes = await nimWithBackoff(() =>
+              nim.chat.completions.create({
+                model: NIM_MODELS.classification,
+                messages: [
+                  {
+                    role: 'user',
+                    content: buildRiskPrompt(
+                      req.summary,
+                      req.risk_signals ?? [],
+                      config.name,
+                      source.productVertical
+                    ),
+                  },
+                ],
+                response_format: { type: 'json_object' },
+                temperature: 0,
+              })
+            )
 
             const cls = JSON.parse(classRes.choices[0].message.content ?? '{}')
             riskLevel = cls.risk_level ?? 'UNKNOWN'
@@ -146,11 +173,11 @@ export const countryScanTask = task({
           let embedding: number[] | null = null
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const embRes = await nim.embeddings.create({
+            const embRes = await nimWithBackoff(() => nim.embeddings.create({
               model: NIM_MODELS.embedding,
               input: `${req.title}. ${req.summary}`,
               input_type: 'passage',
-            } as any)
+            } as any))
             embedding = embRes.data[0].embedding
           } catch (err) {
             console.warn('Embedding failed:', err)
