@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, RefreshCw } from 'lucide-react'
@@ -19,7 +19,7 @@ interface DossierResponse {
   requirements: RegulatoryRequirement[]
 }
 
-export default function DossierPage() {
+function DossierContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -182,5 +182,13 @@ export default function DossierPage() {
         making operational or investment decisions. Last scan: daily at 06:00 UTC.
       </p>
     </main>
+  )
+}
+
+export default function DossierPage() {
+  return (
+    <Suspense>
+      <DossierContent />
+    </Suspense>
   )
 }
