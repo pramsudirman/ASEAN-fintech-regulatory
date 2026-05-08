@@ -27,7 +27,7 @@ export default function Home() {
       {/* Logo / brand */}
       <div className="mb-12">
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-semibold tracking-tight">RegCompass</span>
+          <span className="text-base font-semibold tracking-tight">Regulatory Compass</span>
           <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">
             ASEAN
           </span>
@@ -40,7 +40,7 @@ export default function Home() {
           Select countries and products
         </h1>
         <p className="text-sm text-gray-500">
-          Generate a regulatory dossier for your ASEAN market expansion.
+          Built for PM in Fintech who needs an initial research tool in regards to regulatory across ASEAN market
         </p>
       </div>
 

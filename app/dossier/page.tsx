@@ -180,7 +180,7 @@ function DossierContent() {
 
       {/* Footer disclaimer */}
       <p className="mt-12 text-xs text-gray-400 border-t border-gray-100 pt-6">
-        RegCompass ASEAN — Not Legal Advice. Data sourced from official regulator
+        Regulatory Compass ASEAN — Not Legal Advice. Data sourced from official regulator
         websites via automated scan. Verify with qualified legal counsel before
         making operational or investment decisions. Last scan: daily at 06:00 UTC.
       </p>

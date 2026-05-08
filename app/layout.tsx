@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'RegCompass ASEAN — Regulatory Intelligence Dossier',
+  title: 'Regulatory Compass ASEAN — Regulatory Intelligence Dossier',
   description:
     'Multi-country × multi-product regulatory risk dossier for ASEAN fintech PMs',
 }
