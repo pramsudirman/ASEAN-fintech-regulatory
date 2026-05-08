@@ -31,25 +31,28 @@ function DossierContent() {
   const [error, setError]       = useState<string | null>(null)
   const [hasUpdates, setHasUpdates] = useState(false)
 
+  const countriesKey = countries.join(',')
+  const productsKey  = products.join(',')
+
   const fetchDossier = useCallback(async () => {
     setLoading(true)
     setError(null)
     setHasUpdates(false)
 
     try {
-      const params = new URLSearchParams({
-        countries: countries.join(','),
-        products:  products.join(','),
-      })
+      const params = new URLSearchParams({ countries: countriesKey, products: productsKey })
       const res = await fetch(`/api/dossier?${params}`)
-      if (!res.ok) throw new Error(await res.text())
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? `Request failed (${res.status})`)
+      }
       setData(await res.json())
     } catch (err) {
-      setError(String(err))
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
-  }, [countries.join(','), products.join(',')])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [countriesKey, productsKey])
 
   useEffect(() => {
     if (!countries.length || !products.length) {
@@ -57,7 +60,7 @@ function DossierContent() {
       return
     }
     fetchDossier()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchDossier]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Supabase Realtime — watch changelogs for any updates
   useEffect(() => {

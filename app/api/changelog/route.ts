@@ -3,13 +3,28 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const country = searchParams.get('country')    // optional: 'SG'
-  const days = parseInt(searchParams.get('days') ?? '30', 10)
-  const limit = parseInt(searchParams.get('limit') ?? '50', 10)
+  const country = searchParams.get('country') ?? ''
+  const days    = Math.min(parseInt(searchParams.get('days')  ?? '30',  10), 365)
+  const limit   = Math.min(parseInt(searchParams.get('limit') ?? '50',  10), 200)
 
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
 
-  let query = supabaseAdmin
+  // Resolve country filter upfront — return empty if code is invalid
+  let countryId: number | null = null
+  if (country) {
+    const { data } = await supabaseAdmin
+      .from('countries')
+      .select('id')
+      .eq('code', country.toUpperCase())
+      .maybeSingle()
+
+    if (!data) {
+      return NextResponse.json({ changes: [], total: 0 })
+    }
+    countryId = data.id
+  }
+
+  const query = supabaseAdmin
     .from('changelogs')
     .select(`
       id, change_type, old_value, new_value, change_summary,
@@ -24,34 +39,19 @@ export async function GET(req: NextRequest) {
     .order('detected_at', { ascending: false })
     .limit(limit)
 
-  // Filter by country code if provided
-  if (country) {
-    const { data: countryRow } = await supabaseAdmin
-      .from('countries')
-      .select('id')
-      .eq('code', country)
-      .maybeSingle()
-
-    if (countryRow) {
-      // Filter via the joined requirement's country
-      // Supabase doesn't support deep filter directly — post-filter
-      const { data, error } = await query
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filtered = (data ?? []).filter((c: any) => {
-        const req = c.regulatory_requirements
-        if (!req) return false
-        const countryData = Array.isArray(req.countries) ? req.countries[0] : req.countries
-        return countryData?.code === country
-      })
-
-      return NextResponse.json({ changes: filtered, total: filtered.length })
-    }
-  }
-
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ changes: data ?? [], total: data?.length ?? 0 })
+  // Post-filter by country_id if specified (Supabase doesn't support deep WHERE on joined tables)
+  const changes = countryId
+    ? (data ?? []).filter(c => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const req = c.regulatory_requirements as any
+        if (!req) return false
+        const countryData = Array.isArray(req.countries) ? req.countries[0] : req.countries
+        return countryData?.code === country.toUpperCase()
+      })
+    : (data ?? [])
+
+  return NextResponse.json({ changes, total: changes.length })
 }

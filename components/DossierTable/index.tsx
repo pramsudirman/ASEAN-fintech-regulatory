@@ -13,12 +13,16 @@ import {
 import { Separator } from '@/components/ui/separator'
 import type { RegulatoryRequirement, RiskLevel } from '@/lib/supabase'
 
+function resolveJoined<T>(val: T | T[] | undefined): T | undefined {
+  return Array.isArray(val) ? val[0] : val
+}
+
 // ── Detail sheet ───────────────────────────────────────────────────────────
 
 function RequirementDetail({ req }: { req: RegulatoryRequirement }) {
-  const country = Array.isArray(req.countries) ? req.countries[0] : req.countries
-  const product = Array.isArray(req.product_verticals) ? req.product_verticals[0] : req.product_verticals
-  const regulator = Array.isArray(req.regulators) ? req.regulators[0] : req.regulators
+  const country   = resolveJoined(req.countries)
+  const product   = resolveJoined(req.product_verticals)
+  const regulator = resolveJoined(req.regulators)
 
   const deadlineDaysLeft = req.compliance_deadline
     ? Math.ceil(
@@ -106,7 +110,9 @@ function RequirementDetail({ req }: { req: RegulatoryRequirement }) {
               })}
               {deadlineDaysLeft !== null && (
                 <span className="ml-2 font-normal text-xs">
-                  {deadlineDaysLeft > 0 ? `in ${deadlineDaysLeft} days` : `${Math.abs(deadlineDaysLeft)} days ago`}
+                  {deadlineDaysLeft > 0
+                    ? `in ${deadlineDaysLeft} days`
+                    : `${Math.abs(deadlineDaysLeft)} days ago`}
                 </span>
               )}
             </p>
@@ -138,8 +144,8 @@ function DossierRow({
   req: RegulatoryRequirement
   onSelect: (r: RegulatoryRequirement) => void
 }) {
-  const country = Array.isArray(req.countries) ? req.countries[0] : req.countries
-  const product = Array.isArray(req.product_verticals) ? req.product_verticals[0] : req.product_verticals
+  const country = resolveJoined(req.countries)
+  const product = resolveJoined(req.product_verticals)
 
   return (
     <tr
@@ -156,7 +162,8 @@ function DossierRow({
         <RiskBadge level={req.risk_level as RiskLevel} />
       </td>
       <td className="py-4 pr-4">
-        <p className="text-sm text-gray-800">{req.summary}</p>
+        <p className="text-sm font-medium text-gray-800">{req.title}</p>
+        <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{req.summary}</p>
         {req.citation && (
           <p className="mt-0.5 font-mono text-xs text-gray-400">{req.citation}</p>
         )}
@@ -179,11 +186,16 @@ interface DossierTableProps {
   requirements: RegulatoryRequirement[]
 }
 
-const RISK_SECTIONS: Array<{ level: RiskLevel; label: string; divClass: string }> = [
-  { level: 'HIGH',     label: 'HIGH RISK — Operational Blockers',       divClass: 'text-red-600 border-red-200' },
-  { level: 'MODERATE', label: 'MODERATE RISK — Compliance Burden',      divClass: 'text-amber-600 border-amber-200' },
-  { level: 'LOW',      label: 'LOW / INFORMATIONAL',                    divClass: 'text-emerald-600 border-emerald-200' },
-  { level: 'UNKNOWN',  label: 'UNKNOWN — Seek Legal Counsel',           divClass: 'text-gray-500 border-gray-200' },
+const RISK_SECTIONS: Array<{
+  level: RiskLevel
+  label: string
+  textClass: string
+  borderClass: string
+}> = [
+  { level: 'HIGH',     label: 'HIGH RISK — Operational Blockers',  textClass: 'text-red-600',     borderClass: 'border-red-200'     },
+  { level: 'MODERATE', label: 'MODERATE RISK — Compliance Burden', textClass: 'text-amber-600',   borderClass: 'border-amber-200'   },
+  { level: 'LOW',      label: 'LOW / INFORMATIONAL',               textClass: 'text-emerald-600', borderClass: 'border-emerald-200' },
+  { level: 'UNKNOWN',  label: 'UNKNOWN — Seek Legal Counsel',      textClass: 'text-gray-500',    borderClass: 'border-gray-200'    },
 ]
 
 export function DossierTable({ requirements }: DossierTableProps) {
@@ -196,17 +208,17 @@ export function DossierTable({ requirements }: DossierTableProps) {
   return (
     <>
       <div className="space-y-8">
-        {RISK_SECTIONS.map(({ level, label, divClass }) => {
+        {RISK_SECTIONS.map(({ level, label, textClass, borderClass }) => {
           const reqs = grouped[level]
           if (!reqs.length) return null
 
           return (
             <div key={level}>
-              <div className={`flex items-center gap-3 mb-4 pb-2 border-b ${divClass}`}>
-                <span className={`text-xs font-medium uppercase tracking-widest ${divClass.split(' ')[0]}`}>
+              <div className={`flex items-center gap-3 mb-4 pb-2 border-b ${borderClass}`}>
+                <span className={`text-xs font-medium uppercase tracking-widest ${textClass}`}>
                   {label}
                 </span>
-                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full bg-current/10 ${divClass.split(' ')[0]}`}>
+                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full bg-current/10 ${textClass}`}>
                   {reqs.length}
                 </span>
               </div>
