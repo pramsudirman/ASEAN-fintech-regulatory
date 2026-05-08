@@ -450,6 +450,65 @@ INSERT INTO regulatory_requirements (
    'SBV Circular 09/2020 requires licensed banks to develop and publish open APIs for internal use and partner integrations. However, Vietnam lacks a standardised third-party provider (TPP) framework comparable to PSD2. Third-party integrations are governed by bilateral agreements between the bank and the fintech.',
    'SBV Circular 09/2020/TT-NHNN on Open API',
    'https://www.sbv.gov.vn',
+   NOW()),
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- REGTECH (product_vertical_id=10) — all 6 countries
+-- Covers obligations on KYC/AML tool providers, data protection, IT outsourcing
+-- ─────────────────────────────────────────────────────────────────────────────
+
+  -- SG: RegTech
+  (1, 10, 1,
+   'LOW', 'No RegTech-specific license; MAS TRM Guidelines + PDPA apply to all data-processing tools',
+   'Singapore RegTech: MAS TRM Guidelines and PDPA Compliance',
+   'RegTech providers (KYC, AML screening, transaction monitoring) are not separately licensed in Singapore. Deployments must comply with MAS Technology Risk Management (TRM) Guidelines 2021 and the Personal Data Protection Act (PDPA) 2012. Cloud-based RegTech sold to MAS-regulated institutions must satisfy MAS cloud outsourcing requirements including annual third-party audits.',
+   'MAS TRM Guidelines (2021); PDPA 2012; MAS Outsourcing Guidelines',
+   'https://www.mas.gov.sg/regulation/technology-risk',
+   NOW()),
+
+  -- MY: RegTech
+  (2, 10, 2,
+   'LOW', 'No RegTech license required; PDPA Malaysia + BNM outsourcing policy apply',
+   'Malaysia RegTech: PDPA and BNM Outsourcing Policy',
+   'RegTech vendors selling to Malaysian financial institutions must comply with the Personal Data Protection Act 2010 (PDPA) and BNM Risk Management in Technology (RMiT) Policy Document. Cloud services provided to BNM-licensed institutions require BNM notification and annual third-party audits. AML screening tools must align with the Anti-Money Laundering Act (AMLATFPUAA).',
+   'PDPA 2010; BNM RMiT Policy Document (2020); AMLATFPUAA 2001',
+   'https://www.bnm.gov.my/regulation/technology',
+   NOW()),
+
+  -- ID: RegTech
+  (3, 10, 4,
+   'MODERATE', 'OJK POJK 11/2022 on IT governance applies; personal data processing requires local storage under PDP Law 2022',
+   'Indonesia RegTech: OJK IT Governance + PDP Law Data Localization',
+   'RegTech providers servicing OJK-supervised institutions must comply with POJK 11/2022 on Information Technology Governance. Indonesia\'s Personal Data Protection Law (UU PDP, effective 2024) requires personal data of Indonesian citizens to be processed and stored locally. Cross-border data transfer requires OJK and BSSN notification.',
+   'POJK No. 11/POJK.03/2022; UU PDP No. 27 of 2022; Cybersecurity Law (UU ITE)',
+   'https://www.ojk.go.id/regulation',
+   NOW()),
+
+  -- TH: RegTech
+  (4, 10, 6,
+   'LOW', 'PDPA Thailand (effective 2022) applies to all personal data processing; BOT IT outsourcing notification required',
+   'Thailand RegTech: PDPA and BOT IT Outsourcing Requirements',
+   'Thailand\'s Personal Data Protection Act (PDPA), effective June 2022, applies to all RegTech tools processing personal data of Thai individuals. Data processors must implement security standards and sign Data Processing Agreements with financial institution clients. BOT-supervised entities must notify BOT before outsourcing critical IT functions to third-party RegTech vendors.',
+   'PDPA 2019 (effective 2022); BOT Notification on IT Outsourcing',
+   'https://www.pdpc.or.th',
+   NOW()),
+
+  -- PH: RegTech
+  (5, 10, 8,
+   'LOW', 'NPC registration required for personal data processors; BSP Circular 982 on IT risk management applies',
+   'Philippines RegTech: NPC Registration + BSP IT Risk Management',
+   'RegTech providers processing personal data of Philippine residents must register with the National Privacy Commission (NPC) under the Data Privacy Act 2012 (RA 10173). BSP Circular 982 on Technology Risk Management applies to all IT vendors of BSP-supervised institutions. KYC/AML tools must align with AMLC (Anti-Money Laundering Council) regulations.',
+   'Data Privacy Act 2012 (RA 10173); BSP Circular 982; AMLA',
+   'https://www.privacy.gov.ph',
+   NOW()),
+
+  -- VN: RegTech
+  (6, 10, 10,
+   'MODERATE', 'Cybersecurity Law mandates local data storage; personal data of Vietnamese users cannot be transferred abroad without MISA approval',
+   'Vietnam RegTech: Cybersecurity Law — Local Data Storage Mandatory',
+   'Vietnam\'s Cybersecurity Law (2018) and Decree 13/2023 on Personal Data Protection require that personal data of Vietnamese users be stored on servers located within Vietnam. RegTech tools processing financial data must comply with SBV Circular 09/2020 on IT security. Cross-border transfer of personal data requires approval from the Ministry of Information and Communications (MIC).',
+   'Cybersecurity Law 2018; Decree 13/2023/ND-CP on Personal Data; SBV Circular 09/2020',
+   'https://www.sbv.gov.vn',
    NOW())
 
 ON CONFLICT (country_id, product_vertical_id, regulator_id) DO NOTHING;
