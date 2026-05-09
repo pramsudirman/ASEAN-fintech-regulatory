@@ -1,3 +1,5 @@
+Access here: https://regcompass-apac.vercel.app/
+
 # Regulatory Compass ASEAN
 
 > *A regulatory intelligence dossier tool for fintech PMs — because asking legal should not take three weeks and cost the same as a business-class ticket to Singapore.*
